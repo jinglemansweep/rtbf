@@ -22,7 +22,6 @@ RTBF is a Reddit comment management tool that automatically deletes or replaces 
   - `flake8` (linting)
   - `mypy` (type checking)
   - `isort` (import sorting)
-  - `bandit` (security linting)
   - `pytest` (testing)
   - `pre-commit` (git hooks)
 
