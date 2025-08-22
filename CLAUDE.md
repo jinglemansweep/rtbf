@@ -124,6 +124,7 @@ The application requires these environment variables:
 - `STRATEGY` - Action to take: "delete", "update", or "emoji" (default: "delete")
 - `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy (ignored for "emoji" strategy)
 - `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
+- `FLAG_IGNORE` - Ignore flag to protect comments from processing ("forget never") (default: "/fn")
 - `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
 - `LOG_LEVEL` - Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default: "INFO")
 - `COMMENT_LIMIT` - Maximum number of comments to retrieve per check (default: "100")

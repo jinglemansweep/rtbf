@@ -19,6 +19,7 @@ EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
 STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
+FLAG_IGNORE = os.getenv("FLAG_IGNORE", "/fn")
 APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 COMMENT_LIMIT = int(os.getenv("COMMENT_LIMIT", "100"))
@@ -162,6 +163,14 @@ def process_expired_comments() -> None:
         for comment in reddit.user.me().comments.new(limit=COMMENT_LIMIT):
             comment_time = datetime.fromtimestamp(comment.created_utc)
 
+            # Skip comments that contain the ignore flag ("forget never")
+            if FLAG_IGNORE in comment.body:
+                logger.debug(
+                    f"Skipping comment {comment.id}: contains ignore flag "
+                    f"'{FLAG_IGNORE}'"
+                )
+                continue
+
             # Skip comments that already contain the watermark (already processed)
             if WATERMARK in comment.body:
                 logger.debug(
@@ -201,8 +210,9 @@ def main() -> None:
     logger.info(
         f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
         f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, "
-        f"WATERMARK={WATERMARK}, APPEND_WATERMARK={APPEND_WATERMARK}, "
-        f"LOG_LEVEL={LOG_LEVEL}, COMMENT_LIMIT={COMMENT_LIMIT}"
+        f"WATERMARK={WATERMARK}, FLAG_IGNORE={FLAG_IGNORE}, "
+        f"APPEND_WATERMARK={APPEND_WATERMARK}, LOG_LEVEL={LOG_LEVEL}, "
+        f"COMMENT_LIMIT={COMMENT_LIMIT}"
     )
 
     try:

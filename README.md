@@ -75,6 +75,14 @@ RTBF supports three different strategies for handling expired comments:
 - **update**: Replaces the comment content with custom text
 - **emoji**: Replaces the comment content with a random common emoji
 
+### Ignore Flag Feature ("Forget Never")
+
+RTBF supports an ignore flag that allows you to protect specific comments from ever being processed. Any comment containing the ignore flag will be permanently skipped, regardless of age or strategy.
+
+- **FLAG_IGNORE**: Comments containing this text are never processed (default: `/fn`)
+- **Use Case**: Add `/fn` to important comments you want to keep forever
+- **Example**: "This is my best comment ever! /fn" will never be deleted or modified
+
 ### Watermark Feature
 
 When using the "update" or "emoji" strategies, RTBF can append a watermark to replacement text to identify comments that have already been processed. This prevents the tool from repeatedly updating the same comments in future runs. Comments containing the watermark will be automatically skipped.
@@ -111,6 +119,7 @@ EXPIRE_MINUTES=120                          # Comments older than 2 hours will b
 STRATEGY=delete                             # "delete", "update", or "emoji"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
 WATERMARK=#rtbf                             # Watermark to identify processed comments
+FLAG_IGNORE=/fn                             # Ignore flag - comments with this are never processed
 APPEND_WATERMARK=true                       # Append watermark to replacement text
 LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 COMMENT_LIMIT=100                           # Maximum comments to retrieve per check
@@ -130,6 +139,7 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `STRATEGY` | Action: "delete", "update", or "emoji" | `delete` | ❌ |
 | `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji strategy) | `[Comment deleted by user]` | ❌ |
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
+| `FLAG_IGNORE` | Ignore flag - comments containing this are never processed | `/fn` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
 | `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | `INFO` | ❌ |
 | `COMMENT_LIMIT` | Maximum number of comments to retrieve per check | `100` | ❌ |
