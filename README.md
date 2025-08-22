@@ -92,10 +92,10 @@ REDDIT_CLIENT_SECRET=your_client_secret
 REDDIT_USER_AGENT=RTBF/1.0 by u/your_username
 
 # Optional configuration (with defaults)
-EXPIRE_MINUTES=120                    # Comments older than 2 hours will be processed
-STRATEGY=delete                       # "delete" or "update"
+EXPIRE_MINUTES=120                          # Comments older than 2 hours will be processed
+STRATEGY=delete                             # "delete" or "update"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
-CHECK_INTERVAL_MINUTES=10             # Check every 10 minutes
+CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 ```
 
 ## 📋 Configuration Options
@@ -225,11 +225,6 @@ poetry run mypy rtbf/
 ## 📝 License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Issues**: [GitHub Issues](https://github.com/jinglemansweep/rtbf/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jinglemansweep/rtbf/discussions)
 
 ## ⚖️ Legal Disclaimer
 
