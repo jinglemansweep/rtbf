@@ -22,7 +22,9 @@ EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
 STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
-LLM_PROMPT = os.getenv("LLM_PROMPT", "Rewrite this comment: {comment}")
+LLM_PROMPT = os.getenv(
+    "LLM_PROMPT", "Rewrite this comment in a more friendly tone: {comment}"
+)
 LLM_API_URL = os.getenv("LLM_API_URL", "https://api.openai.com/v1/chat/completions")
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
@@ -181,21 +183,25 @@ def call_llm_api(comment_text: str) -> str:
             logger.debug(f"LLM generated replacement: {generated_text[:100]}...")
             return generated_text
         else:
-            logger.error(f"Unexpected API response format: {result}")
-            return "[LLM response error]"
+            logger.error(
+                f"Unexpected API response format: {result}, falling back to emoji"
+            )
+            return get_random_emoji()
 
     except HTTPError as e:
-        logger.error(f"LLM API HTTP error: {e.code} - {e.reason}")
-        return "[LLM API error]"
+        logger.error(
+            f"LLM API HTTP error: {e.code} - {e.reason}, falling back to emoji"
+        )
+        return get_random_emoji()
     except URLError as e:
-        logger.error(f"LLM API connection error: {e.reason}")
-        return "[LLM connection error]"
+        logger.error(f"LLM API connection error: {e.reason}, falling back to emoji")
+        return get_random_emoji()
     except json.JSONDecodeError as e:
-        logger.error(f"LLM API JSON decode error: {e}")
-        return "[LLM JSON error]"
+        logger.error(f"LLM API JSON decode error: {e}, falling back to emoji")
+        return get_random_emoji()
     except Exception as e:
-        logger.error(f"LLM API unexpected error: {e}")
-        return "[LLM unexpected error]"
+        logger.error(f"LLM API unexpected error: {e}, falling back to emoji")
+        return get_random_emoji()
 
 
 def delete_comment_queued(comment: praw.models.Comment) -> None:

@@ -107,6 +107,9 @@ The LLM strategy uses AI to generate contextual replacements for comments. It su
 - `"Rewrite this comment as a haiku: {comment}"` - Creative transformations
 - `"Translate this to Spanish: {comment}"` - Language translation
 
+**Error Handling:**
+If the LLM API call fails (network issues, invalid API key, etc.), the strategy automatically falls back to using a random emoji instead of leaving the comment unchanged.
+
 **Supported Providers:**
 - **OpenAI**: `https://api.openai.com/v1/chat/completions`
 - **OpenRouter**: `https://openrouter.ai/api/v1/chat/completions`
