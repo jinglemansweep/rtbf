@@ -1,32 +1,37 @@
-import praw
+import logging
 import os
 import time
-import logging
 from datetime import datetime, timedelta
 from queue import Queue
 from threading import Thread
+from typing import Any, Callable, Optional
 
-REDDIT_USERNAME = os.getenv('REDDIT_USERNAME')
-REDDIT_PASSWORD = os.getenv('REDDIT_PASSWORD')
-REDDIT_CLIENT_ID = os.getenv('REDDIT_CLIENT_ID')
-REDDIT_CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
-REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT', 'comment_manager by u/user')
+import praw
 
-EXPIRE_MINUTES = int(os.getenv('EXPIRE_MINUTES', '120'))
-STRATEGY = os.getenv('STRATEGY', 'delete')
-REPLACEMENT_TEXT = os.getenv('REPLACEMENT_TEXT', '[Comment deleted by user]')
-CHECK_INTERVAL_MINUTES = int(os.getenv('CHECK_INTERVAL_MINUTES', '10'))
+REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
+REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
+REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "comment_manager by u/user")
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
+STRATEGY = os.getenv("STRATEGY", "delete")
+REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
+CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "10"))
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+
 class PrawQueue:
-    def __init__(self):
-        self.queue = Queue()
+    def __init__(self) -> None:
+        self.queue: Queue = Queue()
         self.worker = Thread(target=self._worker, daemon=True)
         self.worker.start()
-    
-    def _worker(self):
+
+    def _worker(self) -> None:
         while True:
             func, args, kwargs, result_callback = self.queue.get()
             try:
@@ -38,18 +43,33 @@ class PrawQueue:
             finally:
                 self.queue.task_done()
                 time.sleep(1)
-    
-    def put(self, func, *args, result_callback=None, **kwargs):
+
+    def put(
+        self,
+        func: Callable[..., Any],
+        *args: Any,
+        result_callback: Optional[Callable[[Any], None]] = None,
+        **kwargs: Any,
+    ) -> None:
         self.queue.put((func, args, kwargs, result_callback))
 
-def validate_config():
-    required_vars = ['REDDIT_USERNAME', 'REDDIT_PASSWORD', 'REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET']
+
+def validate_config() -> None:
+    required_vars = [
+        "REDDIT_USERNAME",
+        "REDDIT_PASSWORD",
+        "REDDIT_CLIENT_ID",
+        "REDDIT_CLIENT_SECRET",
+    ]
     missing = [var for var in required_vars if not os.getenv(var)]
     if missing:
-        raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
-    
-    if STRATEGY not in ['delete', 'update']:
+        raise ValueError(
+            f"Missing required environment variables: {', '.join(missing)}"
+        )
+
+    if STRATEGY not in ["delete", "update"]:
         raise ValueError(f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete' or 'update'")
+
 
 validate_config()
 
@@ -63,53 +83,67 @@ reddit = praw.Reddit(
 
 praw_queue = PrawQueue()
 
-def delete_comment_queued(comment):
-    def _delete():
+
+def delete_comment_queued(comment: praw.models.Comment) -> None:
+    def _delete() -> None:
         comment.delete()
         logger.info(f"Deleted comment: {comment.id}")
+
     praw_queue.put(_delete)
 
-def update_comment_queued(comment, new_text):
-    def _update():
+
+def update_comment_queued(comment: praw.models.Comment, new_text: str) -> None:
+    def _update() -> None:
         comment.edit(new_text)
         logger.info(f"Updated comment: {comment.id}")
+
     praw_queue.put(_update)
 
-def process_expired_comments():
+
+def process_expired_comments() -> None:
     """Process comments that have expired based on the configured time delay"""
-    
+
     cutoff_time = datetime.now() - timedelta(minutes=EXPIRE_MINUTES)
-    logger.info(f"Checking for comments older than {EXPIRE_MINUTES} minutes (cutoff: {cutoff_time})")
-    
+    logger.info(
+        f"Checking for comments older than {EXPIRE_MINUTES} minutes "
+        f"(cutoff: {cutoff_time})"
+    )
+
     try:
         for comment in reddit.user.me().comments.new(limit=100):
             comment_time = datetime.fromtimestamp(comment.created_utc)
-            
+
             if comment_time < cutoff_time:
-                logger.info(f"Found expired comment from {comment_time}: {comment.id}")
-                
-                if STRATEGY == 'delete':
+                logger.info(
+                    f"Found expired comment from {comment_time}: " f"{comment.id}"
+                )
+
+                if STRATEGY == "delete":
                     delete_comment_queued(comment)
-                elif STRATEGY == 'update':
+                elif STRATEGY == "update":
                     update_comment_queued(comment, REPLACEMENT_TEXT)
             else:
                 logger.debug(f"Comment from {comment_time} is not expired yet")
-                
+
     except Exception as e:
         logger.error(f"Error processing comments: {e}")
 
-def main():
+
+def main() -> None:
     """Main loop to continuously monitor and process expired comments"""
     logger.info("Starting comment manager...")
-    logger.info(f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}")
-    
+    logger.info(
+        f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
+        f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}"
+    )
+
     try:
         user = reddit.user.me()
         logger.info(f"Authenticated as: {user}")
     except Exception as e:
         logger.error(f"Authentication failed: {e}")
         return
-    
+
     while True:
         try:
             process_expired_comments()
@@ -121,6 +155,7 @@ def main():
         except Exception as e:
             logger.error(f"Unexpected error in main loop: {e}")
             time.sleep(60)
+
 
 if __name__ == "__main__":
     main()

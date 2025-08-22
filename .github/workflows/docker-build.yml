@@ -55,7 +55,7 @@ jobs:
           org.opencontainers.image.title=RTBF
           org.opencontainers.image.description=Reddit comment management tool with configurable expiration policies
           org.opencontainers.image.vendor=RTBF Team
-          org.opencontainers.image.licenses=MIT
+          org.opencontainers.image.licenses=GPL-3.0
 
     - name: Build and push Docker image
       id: build
