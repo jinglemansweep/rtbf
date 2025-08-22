@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -6,6 +7,8 @@ from datetime import datetime, timedelta
 from queue import Queue
 from threading import Thread
 from typing import Any, Callable, Optional
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 import praw
 
@@ -18,6 +21,10 @@ REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "comment_manager by u/user")
 EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
 STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
+LLM_PROMPT = os.getenv("LLM_PROMPT", "Rewrite this comment: {comment}")
+LLM_API_URL = os.getenv("LLM_API_URL", "https://api.openai.com/v1/chat/completions")
+LLM_API_KEY = os.getenv("LLM_API_KEY")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
 FLAG_IGNORE = os.getenv("FLAG_IGNORE", "/fn")
 APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
@@ -107,10 +114,15 @@ def validate_config() -> None:
             f"Missing required environment variables: {', '.join(missing)}"
         )
 
-    if STRATEGY not in ["delete", "update", "emoji"]:
+    if STRATEGY not in ["delete", "update", "emoji", "llm"]:
         raise ValueError(
-            f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete', 'update', or 'emoji'"
+            f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete', 'update', "
+            f"'emoji', or 'llm'"
         )
+
+    # Validate LLM configuration if LLM strategy is used
+    if STRATEGY == "llm" and not LLM_API_KEY:
+        raise ValueError("LLM_API_KEY is required when using 'llm' strategy")
 
 
 validate_config()
@@ -132,6 +144,56 @@ praw_queue = PrawQueue()
 def get_random_emoji() -> str:
     """Get a random emoji from the common emojis list."""
     return random.choice(COMMON_EMOJIS)
+
+
+def call_llm_api(comment_text: str) -> str:
+    """Call the LLM API to generate a replacement for the comment."""
+    try:
+        # Format the prompt with the comment text
+        prompt = LLM_PROMPT.format(comment=comment_text)
+
+        # Prepare the API request
+        payload = {
+            "model": LLM_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0.7,
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {LLM_API_KEY}",
+        }
+
+        # Make the API request
+        request = Request(
+            LLM_API_URL, data=json.dumps(payload).encode("utf-8"), headers=headers
+        )
+
+        with urlopen(request, timeout=30) as response:
+            result = json.loads(response.read().decode("utf-8"))
+
+        # Extract the generated text
+        if "choices" in result and len(result["choices"]) > 0:
+            generated_text: str = result["choices"][0]["message"]["content"].strip()
+            logger.debug(f"LLM generated replacement: {generated_text[:100]}...")
+            return generated_text
+        else:
+            logger.error(f"Unexpected API response format: {result}")
+            return "[LLM response error]"
+
+    except HTTPError as e:
+        logger.error(f"LLM API HTTP error: {e.code} - {e.reason}")
+        return "[LLM API error]"
+    except URLError as e:
+        logger.error(f"LLM API connection error: {e.reason}")
+        return "[LLM connection error]"
+    except json.JSONDecodeError as e:
+        logger.error(f"LLM API JSON decode error: {e}")
+        return "[LLM JSON error]"
+    except Exception as e:
+        logger.error(f"LLM API unexpected error: {e}")
+        return "[LLM unexpected error]"
 
 
 def delete_comment_queued(comment: praw.models.Comment) -> None:
@@ -197,6 +259,12 @@ def process_expired_comments() -> None:
                     if APPEND_WATERMARK:
                         replacement_text = f"{replacement_text} {WATERMARK}"
                     update_comment_queued(comment, replacement_text)
+                elif STRATEGY == "llm":
+                    # Replace with LLM-generated text and watermark
+                    replacement_text = call_llm_api(comment.body)
+                    if APPEND_WATERMARK:
+                        replacement_text = f"{replacement_text} {WATERMARK}"
+                    update_comment_queued(comment, replacement_text)
             else:
                 logger.debug(f"Comment from {comment_time} is not expired yet")
 
@@ -214,6 +282,13 @@ def main() -> None:
         f"APPEND_WATERMARK={APPEND_WATERMARK}, LOG_LEVEL={LOG_LEVEL}, "
         f"COMMENT_LIMIT={COMMENT_LIMIT}"
     )
+
+    if STRATEGY == "llm":
+        logger.info(
+            f"LLM Configuration: MODEL={LLM_MODEL}, "
+            f"API_URL={LLM_API_URL}, "
+            f"PROMPT={LLM_PROMPT[:50]}{'...' if len(LLM_PROMPT) > 50 else ''}"
+        )
 
     try:
         user = reddit.user.me()

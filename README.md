@@ -12,7 +12,7 @@ A Python tool for automatically managing Reddit comments with configurable expir
 ## ✨ Features
 
 - **Automatic Comment Management**: Set comments to expire after a configurable time period
-- **Flexible Strategies**: Choose to delete comments, replace with custom text, or replace with random emojis
+- **Flexible Strategies**: Choose to delete comments, replace with custom text, replace with random emojis, or use AI to generate contextual replacements
 - **Continuous Monitoring**: Runs continuously in the background, checking for expired comments
 - **Rate Limited**: Built-in rate limiting to respect Reddit's API guidelines
 - **Docker Support**: Easy deployment with Docker containers
@@ -69,11 +69,12 @@ rtbf
 
 ### Strategy Options
 
-RTBF supports three different strategies for handling expired comments:
+RTBF supports four different strategies for handling expired comments:
 
 - **delete**: Permanently removes the comment from Reddit
 - **update**: Replaces the comment content with custom text
 - **emoji**: Replaces the comment content with a random common emoji
+- **llm**: Uses AI/LLM to generate contextual replacement text
 
 ### Ignore Flag Feature ("Forget Never")
 
@@ -89,6 +90,28 @@ When using the "update" or "emoji" strategies, RTBF can append a watermark to re
 
 - **WATERMARK**: The text used to identify processed comments (default: `#rtbf`)
 - **APPEND_WATERMARK**: Whether to automatically append the watermark (default: `true`)
+
+### LLM Strategy
+
+The LLM strategy uses AI to generate contextual replacements for comments. It supports OpenAI-compatible APIs including OpenAI, OpenRouter, Ollama, and other providers.
+
+**Configuration:**
+- **LLM_MODEL**: Model name (e.g., `gpt-3.5-turbo`, `claude-3-haiku`, `llama2`)
+- **LLM_PROMPT**: Template with `{comment}` placeholder for the original comment
+- **LLM_API_URL**: OpenAI-compatible `/v1/chat/completions` endpoint
+- **LLM_API_KEY**: API key (required for LLM strategy)
+
+**Example Prompts:**
+- `"Write the opposite of this: {comment}"` - Generate contrarian responses
+- `"Summarize this in one sentence: {comment}"` - Create brief summaries
+- `"Rewrite this comment as a haiku: {comment}"` - Creative transformations
+- `"Translate this to Spanish: {comment}"` - Language translation
+
+**Supported Providers:**
+- **OpenAI**: `https://api.openai.com/v1/chat/completions`
+- **OpenRouter**: `https://openrouter.ai/api/v1/chat/completions`
+- **Ollama**: `http://localhost:11434/v1/chat/completions`
+- **Any OpenAI-compatible API**
 
 ### 1. Reddit API Setup
 
@@ -116,8 +139,12 @@ REDDIT_USER_AGENT=RTBF/1.0 by u/your_username
 
 # Optional configuration (with defaults)
 EXPIRE_MINUTES=120                          # Comments older than 2 hours will be processed
-STRATEGY=delete                             # "delete", "update", or "emoji"
+STRATEGY=delete                             # "delete", "update", "emoji", or "llm"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
+LLM_MODEL=gpt-3.5-turbo                     # LLM model (for llm strategy)
+LLM_PROMPT=Rewrite this comment: {comment}  # LLM prompt template with {comment} placeholder
+LLM_API_URL=https://api.openai.com/v1/chat/completions  # OpenAI-compatible API endpoint
+LLM_API_KEY=your_api_key_here               # API key for LLM service
 WATERMARK=#rtbf                             # Watermark to identify processed comments
 FLAG_IGNORE=/fn                             # Ignore flag - comments with this are never processed
 APPEND_WATERMARK=true                       # Append watermark to replacement text
@@ -136,8 +163,12 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `REDDIT_CLIENT_SECRET` | Reddit app client secret | - | ✅ |
 | `REDDIT_USER_AGENT` | User agent string | `comment_manager by u/user` | ❌ |
 | `EXPIRE_MINUTES` | Minutes before comments expire | `120` | ❌ |
-| `STRATEGY` | Action: "delete", "update", or "emoji" | `delete` | ❌ |
-| `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji strategy) | `[Comment deleted by user]` | ❌ |
+| `STRATEGY` | Action: "delete", "update", "emoji", or "llm" | `delete` | ❌ |
+| `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji/llm strategies) | `[Comment deleted by user]` | ❌ |
+| `LLM_MODEL` | LLM model name | `gpt-3.5-turbo` | ❌ |
+| `LLM_PROMPT` | LLM prompt template with {comment} placeholder | `Rewrite this comment: {comment}` | ❌ |
+| `LLM_API_URL` | OpenAI-compatible API endpoint | `https://api.openai.com/v1/chat/completions` | ❌ |
+| `LLM_API_KEY` | API key for LLM service | - | ❌* |
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
 | `FLAG_IGNORE` | Ignore flag - comments containing this are never processed | `/fn` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
