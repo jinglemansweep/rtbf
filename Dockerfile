@@ -7,7 +7,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir poetry
 
 # Copy project files
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml poetry.lock* README.md ./
 COPY rtbf/ ./rtbf/
 
 # Configure Poetry and build

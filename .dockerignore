@@ -47,10 +47,6 @@ dist/
 .env.local
 .env.production
 
-# Documentation
-docs/
-README.md
-
 # Test files
 tests/
 test_*.py
