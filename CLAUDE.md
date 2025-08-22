@@ -122,8 +122,8 @@ The application requires these environment variables:
 - `REDDIT_CLIENT_SECRET` - Reddit app client secret
 - `REDDIT_USER_AGENT` - User agent string (optional)
 - `EXPIRE_MINUTES` - Minutes before comments expire (default: 120)
-- `STRATEGY` - Action to take: "delete" or "update" (default: "delete")
-- `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy
+- `STRATEGY` - Action to take: "delete", "update", or "emoji" (default: "delete")
+- `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy (ignored for "emoji" strategy)
 - `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
 - `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
 - `CHECK_INTERVAL_MINUTES` - Minutes between checks (default: 10)

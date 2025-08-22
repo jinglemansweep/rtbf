@@ -12,7 +12,7 @@ A Python tool for automatically managing Reddit comments with configurable expir
 ## ✨ Features
 
 - **Automatic Comment Management**: Set comments to expire after a configurable time period
-- **Flexible Strategies**: Choose to delete comments completely or replace them with custom text
+- **Flexible Strategies**: Choose to delete comments, replace with custom text, or replace with random emojis
 - **Continuous Monitoring**: Runs continuously in the background, checking for expired comments
 - **Rate Limited**: Built-in rate limiting to respect Reddit's API guidelines
 - **Docker Support**: Easy deployment with Docker containers
@@ -67,9 +67,17 @@ rtbf
 
 ## ⚙️ Setup
 
+### Strategy Options
+
+RTBF supports three different strategies for handling expired comments:
+
+- **delete**: Permanently removes the comment from Reddit
+- **update**: Replaces the comment content with custom text
+- **emoji**: Replaces the comment content with a random common emoji
+
 ### Watermark Feature
 
-When using the "update" strategy, RTBF can append a watermark to replacement text to identify comments that have already been processed. This prevents the tool from repeatedly updating the same comments in future runs. Comments containing the watermark will be automatically skipped.
+When using the "update" or "emoji" strategies, RTBF can append a watermark to replacement text to identify comments that have already been processed. This prevents the tool from repeatedly updating the same comments in future runs. Comments containing the watermark will be automatically skipped.
 
 - **WATERMARK**: The text used to identify processed comments (default: `#rtbf`)
 - **APPEND_WATERMARK**: Whether to automatically append the watermark (default: `true`)
@@ -100,7 +108,7 @@ REDDIT_USER_AGENT=RTBF/1.0 by u/your_username
 
 # Optional configuration (with defaults)
 EXPIRE_MINUTES=120                          # Comments older than 2 hours will be processed
-STRATEGY=delete                             # "delete" or "update"
+STRATEGY=delete                             # "delete", "update", or "emoji"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
 WATERMARK=#rtbf                             # Watermark to identify processed comments
 APPEND_WATERMARK=true                       # Append watermark to replacement text
@@ -117,8 +125,8 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `REDDIT_CLIENT_SECRET` | Reddit app client secret | - | ✅ |
 | `REDDIT_USER_AGENT` | User agent string | `comment_manager by u/user` | ❌ |
 | `EXPIRE_MINUTES` | Minutes before comments expire | `120` | ❌ |
-| `STRATEGY` | Action: "delete" or "update" | `delete` | ❌ |
-| `REPLACEMENT_TEXT` | Replacement text for updates | `[Comment deleted by user]` | ❌ |
+| `STRATEGY` | Action: "delete", "update", or "emoji" | `delete` | ❌ |
+| `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji strategy) | `[Comment deleted by user]` | ❌ |
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
 | `CHECK_INTERVAL_MINUTES` | Minutes between checks | `10` | ❌ |

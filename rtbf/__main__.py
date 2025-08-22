@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import time
 from datetime import datetime, timedelta
 from queue import Queue
@@ -19,7 +20,41 @@ STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
 APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
-CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "10"))
+CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "30"))
+
+# Common emojis for the emoji strategy
+COMMON_EMOJIS = [
+    "😀",
+    "😂",
+    "😊",
+    "😍",
+    "🤔",
+    "😎",
+    "😢",
+    "😡",
+    "🙄",
+    "😴",
+    "👍",
+    "👎",
+    "👌",
+    "✌️",
+    "🤷",
+    "🔥",
+    "💯",
+    "❤️",
+    "🎉",
+    "🤝",
+    "🌟",
+    "⚡",
+    "💡",
+    "🎯",
+    "🚀",
+    "💪",
+    "🎈",
+    "🎁",
+    "☕",
+    "🍕",
+]
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -69,8 +104,10 @@ def validate_config() -> None:
             f"Missing required environment variables: {', '.join(missing)}"
         )
 
-    if STRATEGY not in ["delete", "update"]:
-        raise ValueError(f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete' or 'update'")
+    if STRATEGY not in ["delete", "update", "emoji"]:
+        raise ValueError(
+            f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete', 'update', or 'emoji'"
+        )
 
 
 validate_config()
@@ -84,6 +121,11 @@ reddit = praw.Reddit(
 )
 
 praw_queue = PrawQueue()
+
+
+def get_random_emoji() -> str:
+    """Get a random emoji from the common emojis list."""
+    return random.choice(COMMON_EMOJIS)
 
 
 def delete_comment_queued(comment: praw.models.Comment) -> None:
@@ -134,6 +176,12 @@ def process_expired_comments() -> None:
                     replacement_text = REPLACEMENT_TEXT
                     if APPEND_WATERMARK:
                         replacement_text = f"{REPLACEMENT_TEXT} {WATERMARK}"
+                    update_comment_queued(comment, replacement_text)
+                elif STRATEGY == "emoji":
+                    # Replace with random emoji and watermark
+                    replacement_text = get_random_emoji()
+                    if APPEND_WATERMARK:
+                        replacement_text = f"{replacement_text} {WATERMARK}"
                     update_comment_queued(comment, replacement_text)
             else:
                 logger.debug(f"Comment from {comment_time} is not expired yet")
