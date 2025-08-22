@@ -2,6 +2,11 @@
 
 This document contains information for Claude Code to assist with development of the RTBF (Right To Be Forgotten) project.
 
+## Instructions for Claude
+
+- Run `pre-commit run --all-files` to ensure code quality and tests pass after making changes.
+- Activate and use Python virtual environment located at `<project-root>/.venv` before any development or running commands.
+
 ## Project Overview
 
 RTBF is a Reddit comment management tool that automatically deletes or replaces comments after a configurable time period to help users maintain privacy and control over their digital footprint.
