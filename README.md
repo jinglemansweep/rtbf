@@ -88,6 +88,8 @@ RTBF supports an ignore flag that allows you to protect specific comments from e
 
 When using the "update" or "emoji" strategies, RTBF can append a watermark to replacement text to identify comments that have already been processed. This prevents the tool from repeatedly updating the same comments in future runs. Comments containing the watermark will be automatically skipped.
 
+The watermark is formatted using Reddit's superscript markdown (e.g., `^(#rtbf)`) to make it less visually prominent while still being detectable.
+
 - **WATERMARK**: The text used to identify processed comments (default: `#rtbf`)
 - **APPEND_WATERMARK**: Whether to automatically append the watermark (default: `true`)
 

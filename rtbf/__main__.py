@@ -259,19 +259,19 @@ def process_expired_comments() -> None:
                     # Prepare replacement text with watermark
                     replacement_text = REPLACEMENT_TEXT
                     if APPEND_WATERMARK:
-                        replacement_text = f"{REPLACEMENT_TEXT} {WATERMARK}"
+                        replacement_text = f"{REPLACEMENT_TEXT} ^({WATERMARK})"
                     update_comment_queued(comment, replacement_text)
                 elif STRATEGY == "emoji":
                     # Replace with random emoji and watermark
                     replacement_text = get_random_emoji()
                     if APPEND_WATERMARK:
-                        replacement_text = f"{replacement_text} {WATERMARK}"
+                        replacement_text = f"{replacement_text} ^({WATERMARK})"
                     update_comment_queued(comment, replacement_text)
                 elif STRATEGY == "llm":
                     # Replace with LLM-generated text and watermark
                     replacement_text = call_llm_api(comment.body)
                     if APPEND_WATERMARK:
-                        replacement_text = f"{replacement_text} {WATERMARK}"
+                        replacement_text = f"{replacement_text} ^({WATERMARK})"
                     update_comment_queued(comment, replacement_text)
             else:
                 logger.debug(f"Comment from {comment_time} is not expired yet")
