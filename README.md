@@ -113,6 +113,7 @@ REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=u
 WATERMARK=#rtbf                             # Watermark to identify processed comments
 APPEND_WATERMARK=true                       # Append watermark to replacement text
 LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+COMMENT_LIMIT=100                           # Maximum comments to retrieve per check
 CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 ```
 
@@ -131,6 +132,7 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
 | `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | `INFO` | ❌ |
+| `COMMENT_LIMIT` | Maximum number of comments to retrieve per check | `100` | ❌ |
 | `CHECK_INTERVAL_MINUTES` | Minutes between checks | `10` | ❌ |
 
 ## 🐳 Docker Usage

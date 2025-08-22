@@ -126,6 +126,7 @@ The application requires these environment variables:
 - `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
 - `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
 - `LOG_LEVEL` - Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default: "INFO")
+- `COMMENT_LIMIT` - Maximum number of comments to retrieve per check (default: "100")
 - `CHECK_INTERVAL_MINUTES` - Minutes between checks (default: 10)
 
 ## License

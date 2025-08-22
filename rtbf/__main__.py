@@ -21,6 +21,7 @@ REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
 APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+COMMENT_LIMIT = int(os.getenv("COMMENT_LIMIT", "100"))
 CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "30"))
 
 # Common emojis for the emoji strategy
@@ -158,7 +159,7 @@ def process_expired_comments() -> None:
     )
 
     try:
-        for comment in reddit.user.me().comments.new(limit=100):
+        for comment in reddit.user.me().comments.new(limit=COMMENT_LIMIT):
             comment_time = datetime.fromtimestamp(comment.created_utc)
 
             # Skip comments that already contain the watermark (already processed)
@@ -201,7 +202,7 @@ def main() -> None:
         f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
         f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, "
         f"WATERMARK={WATERMARK}, APPEND_WATERMARK={APPEND_WATERMARK}, "
-        f"LOG_LEVEL={LOG_LEVEL}"
+        f"LOG_LEVEL={LOG_LEVEL}, COMMENT_LIMIT={COMMENT_LIMIT}"
     )
 
     try:
