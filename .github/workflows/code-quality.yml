@@ -27,10 +27,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-lint-
 
-    - name: Install linting dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install black flake8 mypy isort bandit
+        pip install praw
 
     - name: Check code formatting with Black
       run: |
