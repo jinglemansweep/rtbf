@@ -3,14 +3,17 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+# Install Poetry
+RUN pip install --no-cache-dir poetry
+
 # Copy project files
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock* ./
 COPY rtbf/ ./rtbf/
 
-# Install Python dependencies and build wheel
-RUN pip install --upgrade pip setuptools && \
-    pip install --no-cache-dir build && \
-    python -m build --wheel
+# Configure Poetry and build
+RUN poetry config virtualenvs.create false && \
+    poetry install --only=main && \
+    poetry build
 
 # Runtime stage
 FROM python:3.12-slim

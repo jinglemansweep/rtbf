@@ -32,4 +32,4 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
-        additional_dependencies: [praw]
+        additional_dependencies: [praw>=7.7.0]

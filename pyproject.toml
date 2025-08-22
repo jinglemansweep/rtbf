@@ -1,16 +1,15 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+
+[tool.poetry]
 name = "rtbf"
 version = "1.0.0"
 description = "Reddit comment management tool with configurable expiration policies"
+authors = ["RTBF Team"]
 readme = "README.md"
-license = {text = "GPL-3.0"}
-authors = [
-    {name = "RTBF Team"}
-]
+license = "GPL-3.0"
 keywords = ["reddit", "privacy", "comment", "management", "automation"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -22,29 +21,27 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Message Boards",
     "Topic :: Utilities"
 ]
-requires-python = ">=3.11,<4"
-dependencies = [
-    "praw>=7.7.0"
-]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "black>=22.0.0",
-    "flake8>=5.0.0",
-    "mypy>=1.0.0"
-]
+[tool.poetry.dependencies]
+python = ">=3.11,<4"
+praw = ">=7.7.0"
 
-[project.scripts]
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.0.0"
+black = ">=22.0.0"
+flake8 = ">=5.0.0"
+mypy = ">=1.0.0"
+isort = ">=5.0.0"
+bandit = ">=1.7.0"
+pre-commit = ">=3.0.0"
+
+[tool.poetry.scripts]
 rtbf = "rtbf.__main__:main"
 
-[project.urls]
+[tool.poetry.urls]
 Homepage = "https://github.com/username/rtbf"
 Repository = "https://github.com/username/rtbf"
 Issues = "https://github.com/username/rtbf/issues"
-
-[tool.setuptools.packages.find]
-include = ["rtbf*"]
 
 [tool.black]
 line-length = 88
