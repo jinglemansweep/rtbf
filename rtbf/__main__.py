@@ -120,6 +120,9 @@ reddit = praw.Reddit(
     user_agent=REDDIT_USER_AGENT,
 )
 
+# Enable validation to avoid deprecation warning
+reddit.validate_on_submit = True
+
 praw_queue = PrawQueue()
 
 
