@@ -124,6 +124,8 @@ The application requires these environment variables:
 - `EXPIRE_MINUTES` - Minutes before comments expire (default: 120)
 - `STRATEGY` - Action to take: "delete" or "update" (default: "delete")
 - `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy
+- `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
+- `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
 - `CHECK_INTERVAL_MINUTES` - Minutes between checks (default: 10)
 
 ## License

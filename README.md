@@ -67,6 +67,13 @@ rtbf
 
 ## ⚙️ Setup
 
+### Watermark Feature
+
+When using the "update" strategy, RTBF can append a watermark to replacement text to identify comments that have already been processed. This prevents the tool from repeatedly updating the same comments in future runs. Comments containing the watermark will be automatically skipped.
+
+- **WATERMARK**: The text used to identify processed comments (default: `#rtbf`)
+- **APPEND_WATERMARK**: Whether to automatically append the watermark (default: `true`)
+
 ### 1. Reddit API Setup
 
 1. Go to [Reddit App Preferences](https://www.reddit.com/prefs/apps)
@@ -95,6 +102,8 @@ REDDIT_USER_AGENT=RTBF/1.0 by u/your_username
 EXPIRE_MINUTES=120                          # Comments older than 2 hours will be processed
 STRATEGY=delete                             # "delete" or "update"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
+WATERMARK=#rtbf                             # Watermark to identify processed comments
+APPEND_WATERMARK=true                       # Append watermark to replacement text
 CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 ```
 
@@ -110,6 +119,8 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `EXPIRE_MINUTES` | Minutes before comments expire | `120` | ❌ |
 | `STRATEGY` | Action: "delete" or "update" | `delete` | ❌ |
 | `REPLACEMENT_TEXT` | Replacement text for updates | `[Comment deleted by user]` | ❌ |
+| `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
+| `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
 | `CHECK_INTERVAL_MINUTES` | Minutes between checks | `10` | ❌ |
 
 ## 🐳 Docker Usage

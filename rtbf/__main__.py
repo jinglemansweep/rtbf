@@ -17,6 +17,8 @@ REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "comment_manager by u/user")
 EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
 STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
+WATERMARK = os.getenv("WATERMARK", "#rtbf")
+APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
 CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "10"))
 
 logging.basicConfig(
@@ -113,6 +115,13 @@ def process_expired_comments() -> None:
         for comment in reddit.user.me().comments.new(limit=100):
             comment_time = datetime.fromtimestamp(comment.created_utc)
 
+            # Skip comments that already contain the watermark (already processed)
+            if WATERMARK in comment.body:
+                logger.debug(
+                    f"Skipping comment {comment.id}: already contains watermark"
+                )
+                continue
+
             if comment_time < cutoff_time:
                 logger.info(
                     f"Found expired comment from {comment_time}: " f"{comment.id}"
@@ -121,7 +130,11 @@ def process_expired_comments() -> None:
                 if STRATEGY == "delete":
                     delete_comment_queued(comment)
                 elif STRATEGY == "update":
-                    update_comment_queued(comment, REPLACEMENT_TEXT)
+                    # Prepare replacement text with watermark
+                    replacement_text = REPLACEMENT_TEXT
+                    if APPEND_WATERMARK:
+                        replacement_text = f"{REPLACEMENT_TEXT} {WATERMARK}"
+                    update_comment_queued(comment, replacement_text)
             else:
                 logger.debug(f"Comment from {comment_time} is not expired yet")
 
@@ -134,7 +147,8 @@ def main() -> None:
     logger.info("Starting comment manager...")
     logger.info(
         f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
-        f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}"
+        f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, "
+        f"WATERMARK={WATERMARK}, APPEND_WATERMARK={APPEND_WATERMARK}"
     )
 
     try:
