@@ -125,6 +125,7 @@ The application requires these environment variables:
 - `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy (ignored for "emoji" strategy)
 - `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
 - `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
+- `LOG_LEVEL` - Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default: "INFO")
 - `CHECK_INTERVAL_MINUTES` - Minutes between checks (default: 10)
 
 ## License

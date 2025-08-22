@@ -20,6 +20,7 @@ STRATEGY = os.getenv("STRATEGY", "delete")
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 WATERMARK = os.getenv("WATERMARK", "#rtbf")
 APPEND_WATERMARK = os.getenv("APPEND_WATERMARK", "true").lower() == "true"
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "30"))
 
 # Common emojis for the emoji strategy
@@ -56,9 +57,9 @@ COMMON_EMOJIS = [
     "🍕",
 ]
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+# Configure logging with environment variable
+log_level = getattr(logging, LOG_LEVEL, logging.INFO)
+logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -199,7 +200,8 @@ def main() -> None:
     logger.info(
         f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
         f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, "
-        f"WATERMARK={WATERMARK}, APPEND_WATERMARK={APPEND_WATERMARK}"
+        f"WATERMARK={WATERMARK}, APPEND_WATERMARK={APPEND_WATERMARK}, "
+        f"LOG_LEVEL={LOG_LEVEL}"
     )
 
     try:

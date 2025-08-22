@@ -112,6 +112,7 @@ STRATEGY=delete                             # "delete", "update", or "emoji"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
 WATERMARK=#rtbf                             # Watermark to identify processed comments
 APPEND_WATERMARK=true                       # Append watermark to replacement text
+LOG_LEVEL=INFO                              # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 ```
 
@@ -129,6 +130,7 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji strategy) | `[Comment deleted by user]` | ❌ |
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |
+| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | `INFO` | ❌ |
 | `CHECK_INTERVAL_MINUTES` | Minutes between checks | `10` | ❌ |
 
 ## 🐳 Docker Usage
