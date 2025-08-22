@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rtbf"
+version = "1.0.0"
+description = "Reddit comment management tool with configurable expiration policies"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "RTBF Team"}
+]
+keywords = ["reddit", "privacy", "comment", "management", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Message Boards",
+    "Topic :: Utilities"
+]
+requires-python = ">=3.11,<4"
+dependencies = [
+    "praw>=7.7.0"
+]
+
+package-mode = false
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0"
+]
+
+[project.scripts]
+rtbf = "rtbf.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/username/rtbf"
+Repository = "https://github.com/username/rtbf"
+Issues = "https://github.com/username/rtbf/issues"
+
+[tool.setuptools.packages.find]
+include = ["rtbf*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
