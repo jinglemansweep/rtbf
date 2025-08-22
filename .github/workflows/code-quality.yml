@@ -47,7 +47,7 @@ jobs:
     - name: Lint with Flake8
       run: |
         echo "::group::Flake8 linting"
-        flake8 rtbf/ --statistics
+        flake8 rtbf/ --max-line-length=88 --statistics
         echo "::endgroup::"
 
     - name: Type check with MyPy
