@@ -99,7 +99,7 @@ The LLM strategy uses AI to generate contextual replacements for comments. It su
 - **LLM_MODEL**: Model name (e.g., `gpt-3.5-turbo`, `claude-3-haiku`, `llama2`)
 - **LLM_PROMPT**: Template with `{comment}` placeholder for the original comment
 - **LLM_API_URL**: OpenAI-compatible `/v1/chat/completions` endpoint
-- **LLM_API_KEY**: API key (required for LLM strategy)
+- **LLM_API_KEY**: API key (optional, not needed for Ollama or local providers)
 
 **Example Prompts:**
 - `"Write the opposite of this: {comment}"` - Generate contrarian responses
@@ -144,7 +144,7 @@ REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=u
 LLM_MODEL=gpt-3.5-turbo                     # LLM model (for llm strategy)
 LLM_PROMPT=Rewrite this comment: {comment}  # LLM prompt template with {comment} placeholder
 LLM_API_URL=https://api.openai.com/v1/chat/completions  # OpenAI-compatible API endpoint
-LLM_API_KEY=your_api_key_here               # API key for LLM service
+LLM_API_KEY=your_api_key_here               # API key for LLM service (optional, not needed for Ollama)
 WATERMARK=#rtbf                             # Watermark to identify processed comments
 FLAG_IGNORE=/fn                             # Ignore flag - comments with this are never processed
 APPEND_WATERMARK=true                       # Append watermark to replacement text
@@ -168,7 +168,7 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `LLM_MODEL` | LLM model name | `gpt-3.5-turbo` | ❌ |
 | `LLM_PROMPT` | LLM prompt template with {comment} placeholder | `Rewrite this comment: {comment}` | ❌ |
 | `LLM_API_URL` | OpenAI-compatible API endpoint | `https://api.openai.com/v1/chat/completions` | ❌ |
-| `LLM_API_KEY` | API key for LLM service | - | ❌* |
+| `LLM_API_KEY` | API key for LLM service (optional for Ollama) | - | ❌ |
 | `WATERMARK` | Watermark to identify processed comments | `#rtbf` | ❌ |
 | `FLAG_IGNORE` | Ignore flag - comments containing this are never processed | `/fn` | ❌ |
 | `APPEND_WATERMARK` | Append watermark to replacement text | `true` | ❌ |

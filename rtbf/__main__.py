@@ -120,9 +120,8 @@ def validate_config() -> None:
             f"'emoji', or 'llm'"
         )
 
-    # Validate LLM configuration if LLM strategy is used
-    if STRATEGY == "llm" and not LLM_API_KEY:
-        raise ValueError("LLM_API_KEY is required when using 'llm' strategy")
+    # LLM_API_KEY is optional (e.g., Ollama doesn't require authentication)
+    # No validation needed for LLM_API_KEY
 
 
 validate_config()
@@ -162,8 +161,11 @@ def call_llm_api(comment_text: str) -> str:
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {LLM_API_KEY}",
         }
+
+        # Add Authorization header only if API key is provided
+        if LLM_API_KEY:
+            headers["Authorization"] = f"Bearer {LLM_API_KEY}"
 
         # Make the API request
         request = Request(
@@ -284,9 +286,10 @@ def main() -> None:
     )
 
     if STRATEGY == "llm":
+        api_key_status = "configured" if LLM_API_KEY else "not set (unauthenticated)"
         logger.info(
             f"LLM Configuration: MODEL={LLM_MODEL}, "
-            f"API_URL={LLM_API_URL}, "
+            f"API_URL={LLM_API_URL}, API_KEY={api_key_status}, "
             f"PROMPT={LLM_PROMPT[:50]}{'...' if len(LLM_PROMPT) > 50 else ''}"
         )
 

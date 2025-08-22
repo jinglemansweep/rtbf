@@ -126,7 +126,7 @@ The application requires these environment variables:
 - `LLM_MODEL` - LLM model to use (default: "gpt-3.5-turbo")
 - `LLM_PROMPT` - Prompt template for LLM with {comment} placeholder (default: "Rewrite this comment: {comment}")
 - `LLM_API_URL` - OpenAI-compatible API URL (default: "https://api.openai.com/v1/chat/completions")
-- `LLM_API_KEY` - API key for LLM service (required for "llm" strategy)
+- `LLM_API_KEY` - API key for LLM service (optional, not needed for Ollama)
 - `WATERMARK` - Watermark text to identify already processed comments (default: "#rtbf")
 - `FLAG_IGNORE` - Ignore flag to protect comments from processing ("forget never") (default: "/fn")
 - `APPEND_WATERMARK` - Whether to append watermark to replacement text (default: "true")
