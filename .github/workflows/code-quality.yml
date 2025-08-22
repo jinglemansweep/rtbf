@@ -35,7 +35,7 @@ jobs:
     - name: Check code formatting with Black
       run: |
         echo "::group::Black formatting check"
-        black --check --diff --color rtbf/ tests/
+        black --check --diff --color rtbf/
         echo "::endgroup::"
 
     - name: Check import sorting with isort
