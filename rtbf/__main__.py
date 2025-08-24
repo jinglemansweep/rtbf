@@ -19,7 +19,8 @@ REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "comment_manager by u/user")
 
 EXPIRE_MINUTES = int(os.getenv("EXPIRE_MINUTES", "120"))
-STRATEGY = os.getenv("STRATEGY", "delete")
+DELETE_MINUTES = int(os.getenv("DELETE_MINUTES", "1440"))  # Default: 24 hours
+STRATEGY = os.getenv("STRATEGY", "update")  # Default changed from 'delete' to 'update'
 REPLACEMENT_TEXT = os.getenv("REPLACEMENT_TEXT", "[Comment deleted by user]")
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
 LLM_PROMPT = os.getenv(
@@ -116,10 +117,9 @@ def validate_config() -> None:
             f"Missing required environment variables: {', '.join(missing)}"
         )
 
-    if STRATEGY not in ["delete", "update", "emoji", "llm"]:
+    if STRATEGY not in ["update", "emoji", "llm"]:
         raise ValueError(
-            f"Invalid STRATEGY '{STRATEGY}'. Must be 'delete', 'update', "
-            f"'emoji', or 'llm'"
+            f"Invalid STRATEGY '{STRATEGY}'. Must be 'update', 'emoji', or 'llm'"
         )
 
     # LLM_API_KEY is optional (e.g., Ollama doesn't require authentication)
@@ -220,13 +220,39 @@ def update_comment_queued(comment: praw.models.Comment, new_text: str) -> None:
     praw_queue.put(_update)
 
 
-def process_expired_comments() -> None:
-    """Process comments that have expired based on the configured time delay"""
+def obfuscate_comment(comment: praw.models.Comment) -> None:
+    """Apply the selected obfuscation strategy to a comment."""
+    if STRATEGY == "update":
+        # Prepare replacement text with watermark
+        replacement_text = REPLACEMENT_TEXT
+        if APPEND_WATERMARK:
+            replacement_text = f"{REPLACEMENT_TEXT} ^({WATERMARK})"
+        update_comment_queued(comment, replacement_text)
+    elif STRATEGY == "emoji":
+        # Replace with random emoji and watermark
+        replacement_text = get_random_emoji()
+        if APPEND_WATERMARK:
+            replacement_text = f"{replacement_text} ^({WATERMARK})"
+        update_comment_queued(comment, replacement_text)
+    elif STRATEGY == "llm":
+        # Replace with LLM-generated text and watermark
+        replacement_text = call_llm_api(comment.body)
+        if APPEND_WATERMARK:
+            replacement_text = f"{replacement_text} ^({WATERMARK})"
+        update_comment_queued(comment, replacement_text)
 
-    cutoff_time = datetime.now() - timedelta(minutes=EXPIRE_MINUTES)
+
+def process_expired_comments() -> None:
+    """Process comments using two-stage system: obfuscation first, then deletion"""
+
+    # Calculate cutoff times for obfuscation and deletion
+    obfuscation_cutoff = datetime.now() - timedelta(minutes=EXPIRE_MINUTES)
+    deletion_cutoff = datetime.now() - timedelta(minutes=DELETE_MINUTES)
+
     logger.info(
-        f"Checking for comments older than {EXPIRE_MINUTES} minutes "
-        f"(cutoff: {cutoff_time})"
+        f"Checking comments: obfuscation after {EXPIRE_MINUTES} minutes "
+        f"({obfuscation_cutoff}), deletion after {DELETE_MINUTES} minutes "
+        f"({deletion_cutoff})"
     )
 
     try:
@@ -241,40 +267,37 @@ def process_expired_comments() -> None:
                 )
                 continue
 
-            # Skip comments that already contain the watermark (already processed)
-            if WATERMARK in comment.body:
-                logger.debug(
-                    f"Skipping comment {comment.id}: already contains watermark"
-                )
+            # Determine action based on age and current state
+            is_obfuscation_ready = comment_time < obfuscation_cutoff
+            is_deletion_ready = comment_time < deletion_cutoff
+            already_obfuscated = WATERMARK in comment.body
+
+            # Priority 1: Delete if deletion time reached
+            if is_deletion_ready:
+                # If deletion and obfuscation timeouts are the same, prioritize delete
+                if DELETE_MINUTES == EXPIRE_MINUTES or already_obfuscated:
+                    logger.info(f"Deleting comment from {comment_time}: {comment.id}")
+                    delete_comment_queued(comment)
+                    continue
+                # Otherwise, obfuscate first if not already done
+                elif not already_obfuscated:
+                    logger.info(
+                        f"Obfuscating comment (deletion pending) from {comment_time}: "
+                        f"{comment.id}"
+                    )
+                    obfuscate_comment(comment)
+                    continue
+
+            # Priority 2: Obfuscate if obfuscation time reached and not already done
+            elif is_obfuscation_ready and not already_obfuscated:
+                logger.info(f"Obfuscating comment from {comment_time}: {comment.id}")
+                obfuscate_comment(comment)
                 continue
 
-            if comment_time < cutoff_time:
-                logger.info(
-                    f"Found expired comment from {comment_time}: " f"{comment.id}"
-                )
-
-                if STRATEGY == "delete":
-                    delete_comment_queued(comment)
-                elif STRATEGY == "update":
-                    # Prepare replacement text with watermark
-                    replacement_text = REPLACEMENT_TEXT
-                    if APPEND_WATERMARK:
-                        replacement_text = f"{REPLACEMENT_TEXT} ^({WATERMARK})"
-                    update_comment_queued(comment, replacement_text)
-                elif STRATEGY == "emoji":
-                    # Replace with random emoji and watermark
-                    replacement_text = get_random_emoji()
-                    if APPEND_WATERMARK:
-                        replacement_text = f"{replacement_text} ^({WATERMARK})"
-                    update_comment_queued(comment, replacement_text)
-                elif STRATEGY == "llm":
-                    # Replace with LLM-generated text and watermark
-                    replacement_text = call_llm_api(comment.body)
-                    if APPEND_WATERMARK:
-                        replacement_text = f"{replacement_text} ^({WATERMARK})"
-                    update_comment_queued(comment, replacement_text)
             else:
-                logger.debug(f"Comment from {comment_time} is not expired yet")
+                logger.debug(
+                    f"Comment from {comment_time} not ready for processing yet"
+                )
 
     except Exception as e:
         logger.error(f"Error processing comments: {e}")
@@ -284,11 +307,11 @@ def main() -> None:
     """Main loop to continuously monitor and process expired comments"""
     logger.info("Starting comment manager...")
     logger.info(
-        f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES}, "
-        f"STRATEGY={STRATEGY}, CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, "
-        f"WATERMARK={WATERMARK}, FLAG_IGNORE={FLAG_IGNORE}, "
-        f"APPEND_WATERMARK={APPEND_WATERMARK}, LOG_LEVEL={LOG_LEVEL}, "
-        f"COMMENT_LIMIT={COMMENT_LIMIT}"
+        f"Configuration: EXPIRE_MINUTES={EXPIRE_MINUTES} (obfuscation), "
+        f"DELETE_MINUTES={DELETE_MINUTES} (deletion), STRATEGY={STRATEGY}, "
+        f"CHECK_INTERVAL={CHECK_INTERVAL_MINUTES}, WATERMARK={WATERMARK}, "
+        f"FLAG_IGNORE={FLAG_IGNORE}, APPEND_WATERMARK={APPEND_WATERMARK}, "
+        f"LOG_LEVEL={LOG_LEVEL}, COMMENT_LIMIT={COMMENT_LIMIT}"
     )
 
     if STRATEGY == "llm":

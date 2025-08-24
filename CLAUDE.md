@@ -9,7 +9,21 @@ This document contains information for Claude Code to assist with development of
 
 ## Project Overview
 
-RTBF is a Reddit comment management tool that automatically deletes or replaces comments after a configurable time period to help users maintain privacy and control over their digital footprint.
+RTBF is a Reddit comment management tool that uses a two-stage privacy system: first obfuscating comments (replacing content) after a short period, then permanently deleting them after a longer period. This provides immediate privacy protection while allowing for complete removal later.
+
+## Two-Stage Privacy System
+
+RTBF uses a sophisticated two-stage approach:
+
+1. **Obfuscation Stage**: After `EXPIRE_MINUTES`, comments are replaced using the selected strategy (update/emoji/llm) while preserving the comment structure
+2. **Destruction Stage**: After `DELETE_MINUTES`, comments are permanently deleted from Reddit
+
+This design provides immediate privacy protection while allowing time to verify the system works correctly before permanent deletion.
+
+**Priority Logic**:
+- If `DELETE_MINUTES == EXPIRE_MINUTES`: Comments are deleted immediately (skipping obfuscation to save API requests)
+- If comment is already obfuscated and deletion time reached: Delete immediately
+- Otherwise: Obfuscate first, then delete when deletion time is reached
 
 ## Technology Stack
 
@@ -120,8 +134,9 @@ The application requires these environment variables:
 - `REDDIT_CLIENT_ID` - Reddit app client ID
 - `REDDIT_CLIENT_SECRET` - Reddit app client secret
 - `REDDIT_USER_AGENT` - User agent string (optional)
-- `EXPIRE_MINUTES` - Minutes before comments expire (default: 120)
-- `STRATEGY` - Action to take: "delete", "update", "emoji", or "llm" (default: "delete")
+- `EXPIRE_MINUTES` - Minutes before comments are obfuscated (default: 120)
+- `DELETE_MINUTES` - Minutes before comments are permanently deleted (default: 1440 = 24 hours)
+- `STRATEGY` - Obfuscation method: "update", "emoji", or "llm" (default: "update")
 - `REPLACEMENT_TEXT` - Text to replace comments with if using "update" strategy (ignored for "emoji" and "llm" strategies)
 - `LLM_MODEL` - LLM model to use (default: "gpt-3.5-turbo")
 - `LLM_PROMPT` - Prompt template for LLM with {comment} placeholder (default: "Rewrite this comment: {comment}")

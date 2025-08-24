@@ -7,12 +7,13 @@
 [![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Typing: mypy](https://img.shields.io/badge/Typing-mypy-blue.svg)](https://mypy.readthedocs.io/)
 
-A Python tool for automatically managing Reddit comments with configurable expiration policies. RTBF helps you maintain privacy and control over your digital footprint by automatically deleting or replacing your Reddit comments after a specified time period.
+A Python tool for automatically managing Reddit comments using a sophisticated two-stage privacy system. RTBF first obfuscates comments (replacing content) after a short period, then permanently deletes them after a longer period, providing immediate privacy protection with the option for complete removal.
 
 ## ✨ Features
 
-- **Automatic Comment Management**: Set comments to expire after a configurable time period
-- **Flexible Strategies**: Choose to delete comments, replace with custom text, replace with random emojis, or use AI to generate contextual replacements
+- **Two-Stage Privacy System**: Obfuscate comments first, then delete them permanently after a separate timeout
+- **Flexible Obfuscation**: Replace with custom text, random emojis, or AI-generated content
+- **Intelligent Prioritization**: Optimizes API usage when obfuscation and deletion timeouts are equal
 - **Continuous Monitoring**: Runs continuously in the background, checking for expired comments
 - **Rate Limited**: Built-in rate limiting to respect Reddit's API guidelines
 - **Docker Support**: Easy deployment with Docker containers
@@ -67,14 +68,25 @@ rtbf
 
 ## ⚙️ Setup
 
-### Strategy Options
+### Two-Stage Privacy System
 
-RTBF supports four different strategies for handling expired comments:
+RTBF uses a sophisticated approach with separate timeouts for obfuscation and deletion:
 
-- **delete**: Permanently removes the comment from Reddit
+1. **Obfuscation Stage** (`EXPIRE_MINUTES`): Comments are replaced using the selected strategy
+2. **Destruction Stage** (`DELETE_MINUTES`): Comments are permanently deleted from Reddit
+
+### Obfuscation Strategies
+
+RTBF supports three obfuscation methods:
+
 - **update**: Replaces the comment content with custom text
 - **emoji**: Replaces the comment content with a random common emoji
 - **llm**: Uses AI/LLM to generate contextual replacement text
+
+**Priority Logic:**
+- If `DELETE_MINUTES == EXPIRE_MINUTES`: Comments are deleted immediately (skipping obfuscation)
+- If comment is already obfuscated and deletion time reached: Delete immediately
+- Otherwise: Obfuscate first, then delete when deletion time is reached
 
 ### Ignore Flag Feature ("Forget Never")
 
@@ -143,8 +155,9 @@ REDDIT_CLIENT_SECRET=your_client_secret
 REDDIT_USER_AGENT=RTBF/1.0 by u/your_username
 
 # Optional configuration (with defaults)
-EXPIRE_MINUTES=120                          # Comments older than 2 hours will be processed
-STRATEGY=delete                             # "delete", "update", "emoji", or "llm"
+EXPIRE_MINUTES=120                          # Minutes before obfuscation (2 hours)
+DELETE_MINUTES=1440                         # Minutes before deletion (24 hours)
+STRATEGY=update                             # Obfuscation method: "update", "emoji", or "llm"
 REPLACEMENT_TEXT=[Comment deleted by user]  # Text to replace with if strategy=update
 LLM_MODEL=gpt-3.5-turbo                     # LLM model (for llm strategy)
 LLM_PROMPT=Rewrite this comment: {comment}  # LLM prompt template with {comment} placeholder
@@ -167,8 +180,9 @@ CHECK_INTERVAL_MINUTES=10                   # Check every 10 minutes
 | `REDDIT_CLIENT_ID` | Reddit app client ID | - | ✅ |
 | `REDDIT_CLIENT_SECRET` | Reddit app client secret | - | ✅ |
 | `REDDIT_USER_AGENT` | User agent string | `comment_manager by u/user` | ❌ |
-| `EXPIRE_MINUTES` | Minutes before comments expire | `120` | ❌ |
-| `STRATEGY` | Action: "delete", "update", "emoji", or "llm" | `delete` | ❌ |
+| `EXPIRE_MINUTES` | Minutes before comments are obfuscated | `120` | ❌ |
+| `DELETE_MINUTES` | Minutes before comments are permanently deleted | `1440` | ❌ |
+| `STRATEGY` | Obfuscation method: "update", "emoji", or "llm" | `update` | ❌ |
 | `REPLACEMENT_TEXT` | Replacement text for updates (ignored for emoji/llm strategies) | `[Comment deleted by user]` | ❌ |
 | `LLM_MODEL` | LLM model name | `gpt-3.5-turbo` | ❌ |
 | `LLM_PROMPT` | LLM prompt template with {comment} placeholder | `Rewrite this comment: {comment}` | ❌ |
