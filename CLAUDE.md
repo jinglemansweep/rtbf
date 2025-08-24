@@ -151,7 +151,7 @@ The application requires these environment variables:
 
 ## License
 
-This project is licensed under GPL-3.0. See the LICENSE file for details.
+This project uses the GPL-3.0 license. See the LICENSE file for details.
 
 ## Code Quality Standards
 
@@ -185,4 +185,4 @@ When working on this project, you'll typically need to:
 - Follow the existing code style and patterns
 - Ensure all environment variables are properly documented
 - Test Docker builds when making changes to dependencies or build process
-- The project uses GPL-3.0 license - ensure any code additions are compatible
+- The project uses GPL-3.0 license
