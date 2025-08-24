@@ -7,7 +7,19 @@
 [![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Typing: mypy](https://img.shields.io/badge/Typing-mypy-blue.svg)](https://mypy.readthedocs.io/)
 
-A Python tool for automatically managing Reddit comments using a sophisticated two-stage privacy system. RTBF first obfuscates comments (replacing content) after a short period, then permanently deletes them after a longer period, providing immediate privacy protection with the option for complete removal.
+A Python tool for automatically managing Reddit comments using a sophisticated two-stage privacy system. RTBF helps enforce your **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** as established by EU GDPR Article 17, giving you control over your digital footprint on Reddit.
+
+RTBF first obfuscates comments (replacing content) after a short period, then permanently deletes them after a longer period, providing immediate privacy protection with the option for complete removal.
+
+## 🏛️ Legal Foundation
+
+RTBF is inspired by the **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** established in EU GDPR Article 17, which grants individuals the right to have their personal data erased. While Reddit operates under US jurisdiction, this tool empowers users to exercise similar control over their digital presence by automatically managing their comment history.
+
+**Key Principles:**
+- **User Control**: You decide what happens to your content and when
+- **Privacy by Design**: Proactive rather than reactive privacy management
+- **Transparency**: Open source tool with clear documentation of all actions
+- **Graduated Response**: Obfuscation first, deletion later - giving you control over the process
 
 ## ✨ Features
 
