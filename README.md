@@ -13,7 +13,7 @@ RTBF first obfuscates comments (replacing content) after a short period, then pe
 
 ## 🏛️ Legal Foundation
 
-RTBF is inspired by the **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** established in EU GDPR Article 17, which grants individuals the right to have their personal data erased. While Reddit operates under US jurisdiction, this tool empowers users to exercise similar control over their digital presence by automatically managing their comment history.
+RTBF is inspired by **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** established in EU GDPR Article 17, which grants individuals the right to have their personal data erased. While Reddit operates under US jurisdiction, this tool empowers users to exercise similar control over their digital presence by automatically managing their comment history.
 
 **Key Principles:**
 - **User Control**: You decide what happens to your content and when
