@@ -7,7 +7,7 @@
 [![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Typing: mypy](https://img.shields.io/badge/Typing-mypy-blue.svg)](https://mypy.readthedocs.io/)
 
-A Python tool for automatically managing Reddit comments using a sophisticated two-stage privacy system. RTBF helps enforce your **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** as established by EU GDPR Article 17, giving you control over your digital footprint on Reddit.
+A Python tool for automatically managing Reddit comments using a two-stage privacy system. RTBF helps enforce your **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)** as established by EU GDPR Article 17, giving you control over your digital footprint on Reddit.
 
 RTBF first obfuscates comments (replacing content) after a short period, then permanently deletes them after a longer period, providing immediate privacy protection with the option for complete removal.
 
@@ -25,11 +25,11 @@ RTBF is inspired by **[Right to be Forgotten](https://gdpr-info.eu/art-17-gdpr/)
 
 - **Two-Stage Privacy System**: Obfuscate comments first, then delete them permanently after a separate timeout
 - **Flexible Obfuscation**: Replace with custom text, random emojis, or AI-generated content
-- **Intelligent Prioritization**: Optimizes API usage when obfuscation and deletion timeouts are equal
+- **Priority Handling**: Optimizes API usage when obfuscation and deletion timeouts are equal
 - **Continuous Monitoring**: Runs continuously in the background, checking for expired comments
 - **Rate Limited**: Built-in rate limiting to respect Reddit's API guidelines
 - **Docker Support**: Easy deployment with Docker containers
-- **Configurable**: Extensive configuration options via environment variables
+- **Configurable**: Configuration options via environment variables
 - **Secure**: No storage of credentials - uses environment variables only
 
 ## 🚀 Quick Start
@@ -82,7 +82,7 @@ rtbf
 
 ### Two-Stage Privacy System
 
-RTBF uses a sophisticated approach with separate timeouts for obfuscation and deletion:
+RTBF uses separate timeouts for obfuscation and deletion:
 
 1. **Obfuscation Stage** (`EXPIRE_MINUTES`): Comments are replaced using the selected strategy
 2. **Destruction Stage** (`DELETE_MINUTES`): Comments are permanently deleted from Reddit

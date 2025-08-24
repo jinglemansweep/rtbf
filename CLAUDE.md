@@ -13,7 +13,7 @@ RTBF is a Reddit comment management tool that uses a two-stage privacy system: f
 
 ## Two-Stage Privacy System
 
-RTBF uses a sophisticated two-stage approach:
+RTBF uses a two-stage approach:
 
 1. **Obfuscation Stage**: After `EXPIRE_MINUTES`, comments are replaced using the selected strategy (update/emoji/llm) while preserving the comment structure
 2. **Destruction Stage**: After `DELETE_MINUTES`, comments are permanently deleted from Reddit
